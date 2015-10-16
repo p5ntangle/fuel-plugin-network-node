@@ -1,38 +1,21 @@
-# These tasks will be merged into deployment graph. Here you
-# can specify new tasks for any roles, even built-in ones.
+####
 
-- id: fuel-plugin-network-node
+- id: network-node
   type: group
-  role: [fuel-plugin-network-node]
-
-- id: fuel-plugin-network-node-deployment-puppet
-  type: puppet
-  groups: [fuel-plugin-network-node]
-  required_for: [deploy_end]
+  role: [network-node]
   requires: [deploy_start]
+  required_for: [deploy_end]
   parameters:
-    puppet_manifest: "deploy.pp"
-    puppet_modules: ""
+    strategy:
+      type: one_by_one
+
+### Tasks
+- id: network-node-task
+  type: puppet
+  groups: [network-node]
+  requires: [cluster, firewall]
+  required_for: [deploy_end]
+  parameters:
+    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/openstack-network/openstack-network-controller.pp
+    puppet_modules: /etc/puppet/modules
     timeout: 3600
-
-#- id: fuel-plugin-network-node-post-deployment-sh
-#  type: shell
-#  role: [fuel-plugin-network-node]
-#  required_for: [post_deployment_end]
-#  requires: [post_deployment_start]
-#  parameters:
-#    cmd: echo post_deployment_task_executed > /tmp/post_deployment
-#    retries: 3
-#    interval: 20
-#    timeout: 180
-
-#- id: fuel-plugin-network-node-pre-deployment-sh
-#  type: shell
-#  role: [fuel-plugin-network-node]
-#  required_for: [pre_deployment_end]
-#  requires: [pre_deployment_start]
-#  parameters:
-#    cmd: echo pre_deployment_task_executed > /tmp/pre_deployment
-#    retries: 3
-#    interval: 20
-#    timeout: 180
