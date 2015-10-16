@@ -1,9 +1,18 @@
 ####
 
+- id: primary-network-node
+  type: group
+  role: [primary-network-node]
+  requires: [deploy_start]
+  required_for: [deploy_end]
+  parameters:
+    strategy:
+      type: one_by_one
+
 - id: network-node
   type: group
   role: [network-node]
-  requires: [deploy_start]
+  requires: [deploy_start, primary-network-node]
   required_for: [deploy_end]
   parameters:
     strategy:
@@ -12,7 +21,7 @@
 ### Tasks
 - id: network-node-task
   type: puppet
-  groups: [network-node]
+  groups: [primary-network-node, network-node]
   requires: [cluster, firewall]
   required_for: [deploy_end]
   parameters:

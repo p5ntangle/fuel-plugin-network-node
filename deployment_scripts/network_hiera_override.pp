@@ -8,7 +8,7 @@ $plugin_yaml = "${plugin_name}.yaml"
 
 if $network_node_plugin {
   
-  $corosync_roles = ['network-node']
+  $corosync_roles = ['primary-network-node', 'network-node']
   $haproxy_nodes = false
   $quantum_settings['neutron_agents'] = ['l3', 'metadata', 'dhcp']
   $quantum_settings["neutron_server_enable"] = false

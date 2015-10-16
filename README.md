@@ -1,4 +1,6 @@
 fuel-plugin-network-node
 ============
 
-Plugin description
+Fuel plugin to seperate the network roles on the their own nodes.
+
+
