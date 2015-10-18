@@ -5,24 +5,50 @@ $hiera_dir = '/etc/hiera/override'
 $plugin_name = 'network-node'
 $plugin_yaml = "${plugin_name}.yaml"
 
-
-
 if $network_node_plugin {
   $network_metadata = hiera_hash('network_metadata')
   $network_roles = ['primary-network-node', 'network-node']
   $network_nodes = get_nodes_hash_by_roles($network_metadata, $network_roles)
- 
+  $management_vip = $network_metadata['vips']['management']['ipaddr']
+  $public_vip = $network_metadata['vips']['public']['ipaddr']
+
+  $quantum_hash = hiera_hash('quantum_settings')
+
+  if hiera('role', 'none') =~ /^primary/ {
+    $primary_controller = 'true'
+  } else {
+    $primary_controller = 'false'
+  }
+
   case hiera_array('role', 'none') {
-    /primary-network-node/: {  
-       $corosync_roles = $network_roles
-       $deploy_vrouter = false
-       $haproxy_nodes = false
-       $corosync_nodes = $network_nodes
-    	}
-	}
+    /primary-network-node/: {
+      $use_neutron = true
+      $corosync_roles = $network_roles
+      $deploy_vrouter = false
+      $haproxy_nodes = false
+      $corosync_nodes = $network_nodes
+      $primary_controller = true
+      $new_quantum_settings_hash = {
+        'neutron_agents' => ['l3', 'metadata', 'dhcp'],
+        'neutron_server_enable' => false,
+        'conf_nova' => false
+      }
+      $neutron_settings = merge($quantum_hash, $new_quantum_settings_hash)
+    }
+    /controller/: {
+      $use_neutron = true
+      $new_quantum_settings_hash = {
+        'neutron_agents' => [''],
+      }
+      $neutron_settings = merge($quantum_hash, $new_quantum_settings_hash)
+    }
+    default: {
+      $use_neutron = true
+    }
+  }
 
 ###################
-$calculated_content = inline_template('
+  $calculated_content = inline_template('
 <% if @corosync_nodes -%>
 <% require "yaml" -%>
 corosync_nodes:
@@ -35,8 +61,19 @@ corosync_roles:
 %>  - <%= crole %>
 <% end -%>
 <% end -%>
+<% if @neutron_settings -%>
+<% require "yaml" -%>
+quantum_settings:
+<%= YAML.dump(@neutron_settings).sub(/--- *$/,"") %>
+<% end -%>
 deploy_vrouter: <%= @deploy_vrouter %>
-')
+primary_controller: <%= @primary_controller %>
+management_vip: <%= @management_vip %>
+database_vip:  <%= @management_vip %>
+service_endpoint: <%= @management_vip %>
+public_vip: <%= @public_vip %>
+use_neutron: <%= @use_neutron %>
+  ')
 
 ###################
 
@@ -47,11 +84,11 @@ deploy_vrouter: <%= @deploy_vrouter %>
     ensure  => file,
     content => "${calculated_content}\n",
   }
-  
+
   package {'ruby-deep-merge':
     ensure  => 'installed',
-  } 
-  
+  }
+
   file_line {'hiera.yaml':
     path  => '/etc/hiera.yaml',
       line  => "  - override/${plugin_name}",
@@ -59,3 +96,5 @@ deploy_vrouter: <%= @deploy_vrouter %>
   }
 
 }
+
+
