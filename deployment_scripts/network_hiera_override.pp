@@ -14,20 +14,19 @@ if $network_node_plugin {
 
   $quantum_hash = hiera_hash('quantum_settings')
 
-  if hiera('role', 'none') =~ /^primary/ {
-    $primary_controller = 'true'
+  if hiera('role', 'none') == 'primary-network-node' {
+    $primary_controller = true
   } else {
-    $primary_controller = 'false'
+    $primary_controller = false
   }
 
   case hiera_array('role', 'none') {
-    /primary-network-node/: {
+    /network-node/: {
       $use_neutron = true
       $corosync_roles = $network_roles
       $deploy_vrouter = false
       $haproxy_nodes = false
       $corosync_nodes = $network_nodes
-      $primary_controller = true
       $new_quantum_settings_hash = {
         'neutron_agents' => ['l3', 'metadata', 'dhcp'],
         'neutron_server_enable' => false,
@@ -41,6 +40,13 @@ if $network_node_plugin {
         'neutron_agents' => [''],
       }
       $neutron_settings = merge($quantum_hash, $new_quantum_settings_hash)
+
+      if hiera('role', 'none') =~ /^primary/ {
+        $primary_controller = 'true'
+      } else {
+        $primary_controller = 'false'
+      }
+
     }
     default: {
       $use_neutron = true
