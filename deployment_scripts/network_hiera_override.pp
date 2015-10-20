@@ -14,14 +14,14 @@ if $network_node_plugin {
 
   $quantum_hash = hiera_hash('quantum_settings')
 
-  if hiera('role', 'none') == 'primary-network-node' {
-    $primary_controller = true
-  } else {
-    $primary_controller = false
-  }
-
   case hiera_array('role', 'none') {
     /network-node/: {
+
+      if hiera('role', 'none') == 'primary-network-node' {
+        $primary_controller = true
+      } else {
+        $primary_controller = false
+      }
       $use_neutron = true
       $corosync_roles = $network_roles
       $deploy_vrouter = false
@@ -46,7 +46,6 @@ if $network_node_plugin {
       } else {
         $primary_controller = 'false'
       }
-
     }
     default: {
       $use_neutron = true
