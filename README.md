@@ -34,7 +34,7 @@ Building the Plugin
 
 5. Move this file to the Fuel Master node with secure copy (scp):
 
-   ``scp vpnaas-plugin-<x.x.x>.rpm root@:<the_Fuel_Master_node_IP address>:/tmp``
+   ``scp network-node-<x.x.x>.rpm root@:<the_Fuel_Master_node_IP address>:/tmp``
    ``cd /tmp``
 
 6. Install the VPNaaS plugin:
