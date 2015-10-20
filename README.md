@@ -25,7 +25,7 @@ Building the Plugin
 
     ``pip install fuel-plugin-builder``
 
-3. Build VPNaaS Fuel plugin:
+3. Build Network Node Fuel plugin:
 
    ``fpb --build fuel-plugin-network-node/``
 
@@ -37,7 +37,7 @@ Building the Plugin
    ``scp network-node-<x.x.x>.rpm root@:<the_Fuel_Master_node_IP address>:/tmp``
    ``cd /tmp``
 
-6. Install the VPNaaS plugin:
+6. Install the Network Node plugin:
 
    ``fuel plugins --install network-plugin-<x.x.x>.rpm``
 
