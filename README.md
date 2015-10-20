@@ -6,7 +6,7 @@ Fuel plugin to seperate the network agent on the their own nodes.
 Summary
 -------
 
-The plugin will dasble the L3, metatdata and DHCP agents on the openstack controllers, 
+The plugin will disable the L3, metatdata and DHCP agents on the openstack controllers, 
 and install and configure the agents on a new network-node role that is created.
 
 Usage
